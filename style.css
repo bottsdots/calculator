@@ -1,0 +1,25 @@
+body {
+    font-family: Arial;
+    text-align: center;
+}
+
+.container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin: 0px auto;
+    border: solid black;
+    width: 50%;
+}
+
+.display {
+    background-color: lightgrey;
+    height: 30px;
+    align-self: stretch;
+    text-align: right;
+}
+
+.operator {
+    background-color: lightblue;
+}
