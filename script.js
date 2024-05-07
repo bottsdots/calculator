@@ -1,16 +1,15 @@
 function operate(operator, x, y) {
-    if (operator === 'add') {
-        add(x, y);
+    switch(operator) {
+        case "add":
+            return add(x,y);
+        case "subtract":
+            return subtract(x,y);
+        case "multiply":
+            return multiply(x,y);
+        case "divide":
+            return divide(x,y);
     }
-    if (operator === 'subtract') {
-        subtract(x, y);
-    }
-    if (operator === 'multiply') {
-        multiply(x, y);
-    }
-    if (operator === 'divide') {
-        divide(x, y);
-    }
+
 }
 
 function add(x, y) {
@@ -29,6 +28,10 @@ function divide(x, y) {
     return x / y;
 }
 
+function displayValueToScreen(displayValue) {
+    display.textContent = displayValue.join("");
+}
+
 function arrayEquals(a, b) {
     return Array.isArray(a) &&
         Array.isArray(b) &&
@@ -37,10 +40,15 @@ function arrayEquals(a, b) {
 }
 
 function runCalculator() {
-    const display = document.querySelector(".display");
+    const display = document.querySelector("#display");
+    const displayAnswer = document.querySelector("#displayAnswer");
     let displayValue = ["0"];
     let operatorCount = 0; //keep track of how many operators have been selected
-    let lastDigitOperator = false; //keep track of last digit
+    let lastDigitOperator = false; //keep track of whether last input was an operator
+    let prevNumber = 0;
+    let currNumber = 0;
+    let answer = 0;
+    let operator = "";
     display.textContent = displayValue;
 
     //number buttons [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
@@ -52,24 +60,26 @@ function runCalculator() {
 
     for (let i = 0; i < numButtons.length; i++) {
         numButtons[i].addEventListener("click", () => {
-            if (i === 0 && !arrayEquals(displayValue, ["0"])) {
+            /* if (i === 0 && !arrayEquals(displayValue, ["0"]) && (!lastBtnEqual || !lastDigitOperator)) {
                 displayValue.push(i.toString());
-            } else {
-                if (arrayEquals(displayValue, ["0"])) {
+            } else { */
+                if (arrayEquals(displayValue, ["0"]) || lastDigitOperator || lastBtnEqual) {
                     displayValue = [i.toString()];
+                    lastDigitOperator = false;
+                    lastBtnEqual = false;
                 } else {
                     displayValue.push(i.toString());
                 }
-            } 
-            display.textContent = displayValue.join("");
+            //} 
+            displayValueToScreen(displayValue);
             lastDigitOperator = false;
         });
     }
 
-    //operator buttons [+, -, x, /, =, clear]
+    //operator buttons [+, -, x, /]
     const opButtons = [];
 
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 4; i++) {
         opButtons[i] = document.querySelector("#opBtn"+i);
     }
 
@@ -78,34 +88,90 @@ function runCalculator() {
             if (!lastDigitOperator) {
                 operatorCount++;
                 lastDigitOperator = true;
+                prevNumber = parseFloat(displayValue.join(""));
                 switch(i) {
                     case 0: //add
-                        displayValue.push("+");
+                        operator = "add";
                         break;
                     case 1: //subtract
-                        displayValue.push("-");
+                        operator = "subtract";
                         break;
                     case 2: //multiply
-                        displayValue.push("×");
+                        operator = "multiply";
                         break;
                     case 3: //divide
-                        displayValue.push("/");
-                        break;
-                    case 4: //equal
-                        displayValue.push("=");
-                        break;
-                    case 5: //clear
-                        if (!arrayEquals(displayValue, ["0"])) {
-                            displayValue = ["0"];
-                        }
+                        operator = "divide";
                         break;
                 }
-                display.textContent = displayValue.join("");
-            } 
+                numberHasDecimalEntered = false;
+                isNegative = false;
+            }
+            displayValueToScreen(displayValue);
         });
-
     }
 
+    const equalButton = document.querySelector("#equalBtn");
+    let lastBtnEqual = false;
+    equalButton.addEventListener("click", () => {
+        if (parseInt(displayValue.join("")) === 0 && operator === "divide") {
+            displayValue = ["oh no"];
+            displayValueToScreen(displayValue);
+        } else if (operatorCount >= 1) {
+            currNumber = prevNumber;
+            prevNumber = parseFloat(displayValue.join(""));
+            console.log("currNumber = " + currNumber + " prevNumber = " + prevNumber);
+            displayValue = [operate(operator, currNumber, prevNumber)];
+            displayValueToScreen(displayValue);
+        }
+        operatorCount = 0;
+        lastBtnEqual = true;
+        numberHasDecimalEntered = false;
+        isNegative = false;
+    });
+
+    const clearButton = document.querySelector("#clearBtn");
+    clearButton.addEventListener("click", () => {
+        displayValue = ["0"];
+        currNumber = 0; prevNumber = 0; //set all numbers to 0
+        displayValueToScreen(displayValue);
+    });
+
+    let numberHasDecimalEntered = (displayValue.indexOf(".") !== -1);
+    const decimalButton = document.querySelector("#decimalBtn");
+    decimalButton.addEventListener("click", () => {
+        numberHasDecimalEntered = (displayValue.indexOf(".") !== -1);
+        if (!numberHasDecimalEntered) {
+            displayValue.push(".");
+            numberHasDecimalEntered = true;
+            displayValueToScreen(displayValue);
+        }
+    });
+
+    let isNegative = false;
+    const negativeButton = document.querySelector("#negativeBtn");
+    negativeButton.addEventListener("click",() => {
+        console.log("hit negative button, display value is " + displayValue);
+        isNegative = (displayValue[0] === "-" || displayValue[0] < 0);
+        if (!isNegative && !arrayEquals(displayValue, ["0"])) {
+            displayValue.unshift("-");
+            isNegative = true;
+        } else if (isNegative && displayValue[0] < 0) {
+            displayValue[0] *= -1;
+        } else if (isNegative && !arrayEquals(displayValue, ["0"])) {
+            displayValue.shift();
+            isNegative = false;
+        }
+        displayValueToScreen(displayValue);
+    });
+
+    const percentButton = document.querySelector("#percentBtn");
+    percentButton.addEventListener("click", () => {
+        console.log((parseFloat(displayValue.join("")))/100);
+        displayValue = (parseFloat(displayValue.join("")))/100;
+        console.log(displayValue + " is now");
+        displayValue = String(displayValue).split("");
+        displayValueToScreen(displayValue);
+    });
 
 
 }
