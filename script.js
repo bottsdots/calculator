@@ -107,6 +107,7 @@ function runCalculator() {
                 isNegative = false;
             }
             displayValueToScreen(displayValue);
+            console.log("after operation displayValue is " + displayValue);
         });
     }
 
@@ -119,8 +120,7 @@ function runCalculator() {
         } else if (operatorCount >= 1) {
             currNumber = prevNumber;
             prevNumber = parseFloat(displayValue.join(""));
-            console.log("currNumber = " + currNumber + " prevNumber = " + prevNumber);
-            displayValue = [operate(operator, currNumber, prevNumber)];
+            displayValue = String(operate(operator, currNumber, prevNumber)).split("");
             displayValueToScreen(displayValue);
         }
         operatorCount = 0;
@@ -140,7 +140,7 @@ function runCalculator() {
     const decimalButton = document.querySelector("#decimalBtn");
     decimalButton.addEventListener("click", () => {
         numberHasDecimalEntered = (displayValue.indexOf(".") !== -1);
-        if (!numberHasDecimalEntered) {
+        if (displayValue.indexOf(".") === -1) {
             displayValue.push(".");
             numberHasDecimalEntered = true;
             displayValueToScreen(displayValue);
@@ -150,7 +150,6 @@ function runCalculator() {
     let isNegative = false;
     const negativeButton = document.querySelector("#negativeBtn");
     negativeButton.addEventListener("click",() => {
-        console.log("hit negative button, display value is " + displayValue);
         isNegative = (displayValue[0] === "-" || displayValue[0] < 0);
         if (!isNegative && !arrayEquals(displayValue, ["0"])) {
             displayValue.unshift("-");
@@ -166,9 +165,7 @@ function runCalculator() {
 
     const percentButton = document.querySelector("#percentBtn");
     percentButton.addEventListener("click", () => {
-        console.log((parseFloat(displayValue.join("")))/100);
         displayValue = (parseFloat(displayValue.join("")))/100;
-        console.log(displayValue + " is now");
         displayValue = String(displayValue).split("");
         displayValueToScreen(displayValue);
     });
