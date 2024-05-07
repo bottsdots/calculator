@@ -73,6 +73,7 @@ function runCalculator() {
             //} 
             displayValueToScreen(displayValue);
             lastDigitOperator = false;
+            setBtnOpacity(numButtons[i]);  
         });
     }
 
@@ -107,7 +108,7 @@ function runCalculator() {
                 isNegative = false;
             }
             displayValueToScreen(displayValue);
-            console.log("after operation displayValue is " + displayValue);
+            setBtnOpacity(opButtons[i]);  
         });
     }
 
@@ -121,12 +122,18 @@ function runCalculator() {
             currNumber = prevNumber;
             prevNumber = parseFloat(displayValue.join(""));
             displayValue = String(operate(operator, currNumber, prevNumber)).split("");
+            if (displayValue.length > 11) { //limit display to 11 digits
+                let extraElementCount = displayValue.length - 11;
+                displayValue.splice(extraElementCount*-1);
+            }
             displayValueToScreen(displayValue);
         }
         operatorCount = 0;
         lastBtnEqual = true;
         numberHasDecimalEntered = false;
         isNegative = false;
+        setBtnOpacity(equalButton);  
+
     });
 
     const clearButton = document.querySelector("#clearBtn");
@@ -134,6 +141,7 @@ function runCalculator() {
         displayValue = ["0"];
         currNumber = 0; prevNumber = 0; //set all numbers to 0
         displayValueToScreen(displayValue);
+        setBtnOpacity(clearButton);  
     });
 
     let numberHasDecimalEntered = (displayValue.indexOf(".") !== -1);
@@ -144,7 +152,9 @@ function runCalculator() {
             displayValue.push(".");
             numberHasDecimalEntered = true;
             displayValueToScreen(displayValue);
-        }
+            lastBtnEqual = false;
+        }   
+        setBtnOpacity(decimalButton);     
     });
 
     let isNegative = false;
@@ -161,16 +171,29 @@ function runCalculator() {
             isNegative = false;
         }
         displayValueToScreen(displayValue);
+        setBtnOpacity(negativeButton);     
+
     });
 
     const percentButton = document.querySelector("#percentBtn");
     percentButton.addEventListener("click", () => {
         displayValue = (parseFloat(displayValue.join("")))/100;
         displayValue = String(displayValue).split("");
+        if (displayValue.length > 11) { //limit display to 11 digits
+            let extraElementCount = displayValue.length - 11;
+            displayValue.splice(extraElementCount*-1);
+        }
         displayValueToScreen(displayValue);
+        setBtnOpacity(percentButton);     
     });
 
+}
 
+function setBtnOpacity(button) {
+    button.style.opacity = "0.5";
+    setTimeout( function () {
+        button.style.opacity = "1";
+    }, 100);
 }
 
 runCalculator();
